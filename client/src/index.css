@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input[type="text"], input[type="password"], input[type="email"],
+textarea {
+    @apply w-full border my-1 py-2 px-3 rounded-2xl;
+}
+
+textarea {
+    height: 140px;
+}
+
+button {
+    @apply bg-gray-300;
+}
+
+button.primary {
+    background-color: #FF385C;
+    @apply bg-primary p-2 w-full text-white rounded-2xl;
+}
+
+.dashboard {
+    display: flex;
+    justify-content: space-between;
+}
+
+.dashboard .swipe-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+}
+
+.swipe {
+    position: absolute;
+}
+
+.dashboard .cardContainer {
+    width: 500px;
+    height: 650px;
+}
+
+.card {
+    width: 500px;
+    height: 650px;
+    border-radius: 30px;
+    background-size: cover;
+    background-position: center;
+}
+
+.card h3 {
+    position: absolute;
+    bottom: 0;
+    margin: 10px;
+    color: #000;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+.dashboard .swipe-info {
+    position: absolute;
+    bottom: 0;
+    padding: 10px;
+}
