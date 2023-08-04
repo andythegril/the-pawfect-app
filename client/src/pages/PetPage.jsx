@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import AccountNav from "../AccountNav.jsx";
 import {useEffect, useState} from "react";
 import axios from "axios";
@@ -9,6 +9,8 @@ import axios from "axios";
 export default function PetPage() {
 
     const [pets, setPets] = useState([]);
+    const [userPetId, setUserPetId] = useState(null);
+
     useEffect(()=> {
         axios.get('/pets').then(({data}) => {
             setPets(data);
@@ -38,16 +40,16 @@ export default function PetPage() {
                                 )}
                             </div>
                             <div className="flex flex-col justify-center">
-                                <h2 className="text-xl uppercase">{pet.name}</h2>
+                                <h2 className="text-xl uppercase text-primary font-bold">{pet.name}</h2>
                                 <h3 className="text-small mt-2 uppercase">{pet.gender}</h3>
-                                <p className="text-small mt-2">For {pet.availableFor}</p>
+                                <p className="text-small mt-2">For {pet.availableFor} | 📍{pet.address} </p>
                                 <p className="text-small mt-2">{pet.desc}</p>
                             </div>
                             <div className="flex m-4 text-center py-10 gap-2 text-gray-500 ">
                                 <Link className="border-2 m-4 px-4 py-2 rounded-2xl" to={'/account/pets/'+pet._id}>Edit</Link>
                                 <Link
                                     className="bg-primary m-4 px-4 py-2 rounded-2xl text-white"
-                                    to={`/account/matching?gender=${pet.gender}&interestedGender=${pet.interestedGender}&type=${pet.type}&availableFor=${pet.availableFor}`}
+                                    to={`/account/matching?userPetId=${pet._id}&gender=${pet.gender}&interestedGender=${pet.interestedGender}&type=${pet.type}&availableFor=${pet.availableFor}`}
                                 >
                                     Match
                                 </Link>

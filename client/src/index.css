@@ -2,8 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-input[type="text"], input[type="password"], input[type="email"],
-textarea {
+input[type="text"], input[type="password"], input[type="email"] {
     @apply w-full border my-1 py-2 px-3 rounded-2xl;
 }
 
@@ -29,9 +28,8 @@ button.primary {
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    height: 50vh;
+    height: 30vh;
 }
 
 .swipe {
@@ -45,23 +43,30 @@ button.primary {
 
 .card {
     width: 500px;
-    height: 650px;
+    height: 550px;
     border-radius: 30px;
     background-size: cover;
     background-position: center;
 }
 
 .card h3 {
-    position: absolute;
+    /*position: absolute;*/
+    align-items: center;
+    justify-content: center;
     bottom: 0;
     margin: 10px;
-    color: #000;
+    color: #fff;
     font-weight: bold;
     font-size: 30px;
+
 }
 
 .dashboard .swipe-info {
-    position: absolute;
+    /*position: absolute;*/
     bottom: 0;
     padding: 10px;
+}
+
+.chat-input{
+    width: 50px;
 }

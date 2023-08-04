@@ -72,7 +72,7 @@ export default function PetFormPage() {
                     <PhotoUploader addedPhoto={addedPhoto} onChange={setAddedPhoto}/>
 
                     <h2 className="text-2xl mt-4">Description</h2>
-                    <textarea value={desc} onChange={ev => setDesc(ev.target.value)} placeholder="say anything about your pet" />
+                    <textarea className="w-full border my-1 py-2 px-3 rounded-2xl" value={desc} onChange={ev => setDesc(ev.target.value)} placeholder="say anything about your pet" />
 
 
                     <h2 className="text-2xl mt-4">Type</h2>

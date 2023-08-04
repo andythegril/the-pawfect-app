@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User.js');
 const Pet = require('./models/Pet.js');
+const Chat = require('./models/Chat.js');
 const cookieParser = require('cookie-parser');
 const imageDownloader = require('image-downloader');
 const multer = require('multer');
@@ -141,6 +142,7 @@ app.get('/pets', (req,res) => {
 })
 
 app.get('/pets/:id', async (req,res) => {
+
     const {id} = req.params;
     res.json(await Pet.findById(id));
 })
@@ -166,23 +168,102 @@ app.put('/pets', async(req,res) => {
     })
 })
 
-app.get('/match-pets', async (req, res) => {
-    const { type, gender, availableFor, interestedGender } = req.query;
-    const { token } = req.cookies;
 
+app.get('/match-pets/:userPetId', async (req, res) => {
+    // const { _id, type, gender, availableFor, interestedGender } = req.query;
+    const { token } = req.cookies;
+    const { type, gender, availableFor, interestedGender } = req.query;
+    const { userPetId } = req.params
 
     try {
         const userData = jwt.verify(token, jwtSecret);
         const { id } = userData;
 
+        const userPet = await Pet.findById(userPetId)
         const matchedPets = await Pet.find({
             owner: { $ne: id },
+            _id: { $not: { $in: userPet.matches } },
             type,
             gender: interestedGender,
             availableFor,
             interestedGender: gender,
-            // matches: { $in: [new ObjectId(id)] } // chỗ này e tính là púsh con matched vào array matches
         });
+        console.log("Potential matches: match-pets ", matchedPets)
+        res.json(matchedPets);
+        console.log('userPet.matches la gi', userPet.matches)
+    } catch (error) {
+        console.error('Error fetching matched pets:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+app.get('/check-match/:userPetId', async (req, res) => {
+
+    const { userPetId } = req.params;
+
+    try {
+
+        if (!userPetId) {
+            return res.status(404).json({ error: "User pet not found" });
+        }
+        const userPet = await Pet.findById(userPetId);
+
+        const swipedRightPets = await Pet.find({
+            _id: { $in: userPet.matches },
+            matches: userPetId,
+        });
+        console.log("backend tra ve check-match", swipedRightPets)
+        res.json(swipedRightPets);
+    } catch (error) {
+        console.error('Error fetching matched pets:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.put('/create-match', async (req, res) => {
+    const { userPetId, matchedPetId } = req.body;
+    const { token } = req.cookies;
+
+    try {
+        const userData = jwt.verify(token, jwtSecret);
+        const userId = userData.id;
+
+        const userPet = await Pet.findById(userPetId);
+
+        const matchedPet = await Pet.findById(matchedPetId);
+
+        if (!userPet || !matchedPet) {
+            return res.status(404).json({ error: "Pet not found" });
+        }
+        const updatedUserPet = userPet.matches.push(matchedPetId);
+        await userPet.save();
+        res.json(updatedUserPet);
+
+
+    } catch (error) {
+        console.error('Error creating match:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/matches/:userPetId', async (req, res) => {
+    const { token } = req.cookies;
+    const { userPetId }  = req.params;
+
+    try {
+        const userData = jwt.verify(token, jwtSecret);
+        const { id } = userData;
+        if (!userPetId) {
+            return res.status(404).json({ error: 'User pet not found' });
+        }
+
+        const matchedPets = await Pet.find({
+            _id: { $in: userPetId.matches },
+            matches: userPetId,
+            owner: { $ne: id },
+        });
+        console.log("matchedPets backend", matchedPets)
         res.json(matchedPets);
     } catch (error) {
         console.error('Error fetching matched pets:', error);
@@ -190,33 +271,75 @@ app.get('/match-pets', async (req, res) => {
     }
 });
 
-app.post('/match-pets', async (req, res) => {
-    const {petId} = req.body;
-    const {token} = req.cookies;
+app.get('/messages', async (req, res) => {
+    const { token } = req.cookies;
+    const { userPetId, clickedUserPetId } = req.query;
+    try {
+        const userData = jwt.verify(token, jwtSecret);
+        const { id } = userData;
+        const userPet = await Pet.findOne({ owner: id });
+        if (!userPet) {
+            return res.status(404).json({ error: 'User pet not found' });
+        }
+
+        const query = {
+            from_userId: userPetId, to_userId: clickedUserPetId
+        }
+        const foundMessages = await Chat.find(query)
+        // console.log("foundMsg from API", foundMessages);
+        res.send(foundMessages);
+
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+app.post('/message', async (req, res) => {
+    const { token } = req.cookies;
+    const { from_userId, to_userId, content, timestamp } = req.body;
 
     try {
         const userData = jwt.verify(token, jwtSecret);
-        // const userId = userData.id;
-        const userPet = await Pet.findOne({owner: userData.id});
-        const swipedPet = await Pet.findById(petId);
+        const userId = userData.id;
+        const userPetId = await Pet.findOne({ owner: userId });
 
-        if (!userPet || !swipedPet) {
-            return res.status(404).json({ error: "Pet not found" });
-        }
+        const newMessage = new Chat({
+            from_userId,
+            to_userId,
+            content,
+            timestamp,
+        });
 
-        userPet.matches.push(swipedPet._id);
-        swipedPet.matches.push(userPet._id);
-
-        await userPet.save();
-        await swipedPet.save();
-
-        res.json({message: 'Match created successfully!'});
+        await newMessage.save();
+        res.send(newMessage);
 
     } catch (error) {
-        console.error('Error fetching matched pets:', error);
+        console.error('Error sending chat message:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
 
-})
+app.get("/adoption-pets", async (req, res) => {
+    const { token } = req.cookies;
+    const { availableFor } = req.query;
+
+    try {
+        const userData = jwt.verify(token, jwtSecret);
+        const { id: userId } = userData;
+        const matchedPets = await Pet.find({
+            availableFor: availableFor,
+            owner: { $ne: userId },
+        })
+            .select('-matches -createdAt -updatedAt')
+            .populate('owner', 'email');
+        console.log(matchedPets)
+        res.json(matchedPets);
+    } catch (error) {
+        console.error('Error fetching adoption pets:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 app.listen(4000);
