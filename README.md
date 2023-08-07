@@ -60,14 +60,27 @@ JWT_SECRET='cjkafbawefbaucncawienfvooaojw'
 
 1. Start the server:
 
-```bash
+```
 npm start
 ```
 
-2. cd api -> run nodemon index.js (install nodemon first)
-
-3. cd client -> run yarn dev OR npm start
-
+2. Install nodemon and vite first
+```
+npm i vite
+npm i nodemon
+```
+4. Navigate api folder
+```
+nodemon index.js 
+```
+5. Navigate client folder
+```
+npm run dev
+```
+OR 
+```
+yarn dev
+```
 ## Contributing
 
 Contributions are welcome! Here's how you can contribute to the project:
