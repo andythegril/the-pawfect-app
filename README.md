@@ -52,7 +52,7 @@ npm install
 4. Create a `.env` file in the project root and add your environment variables:
 
 ```
-MONGO_URI=mongodb+srv://bechimcut:woY9oMbjHviJXVzY@cluster0.vq6nnvb.mongodb.net/?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://<id>:<secret>@cluster0.vq6nnvb.mongodb.net/?retryWrites=true&w=majority
 JWT_SECRET='cjkafbawefbaucncawienfvooaojw'
 ```
 
